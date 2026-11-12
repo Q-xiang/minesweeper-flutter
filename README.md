@@ -125,9 +125,32 @@ flutter build apk --release --flavor prod --split-per-abi
 
 ### 已构建的安装包
 
-**[下载 minesweeper-v1.0.0-arm64-v8a.apk](apk/minesweeper-v1.0.0-arm64-v8a.apk)**（15.2 MB，适用于 arm64 手机，直接传到手机安装即可）
+**[下载 minesweeper-v1.0.0-arm64-v8a.apk](apk/minesweeper-v1.0.0-arm64-v8a.apk)**（15.2 MB，适用于 arm64 手机，传到手机安装即可）
 
-> 说明：release 构建目前沿用 Flutter 模板的 debug 签名（`signingConfigs.getByName("debug")`），可直接侧载安装，但**不能上架应用商店**。正式发布前需要生成自己的 keystore 并配置 signingConfig。
+### 正式签名
+
+release 构建使用 `android/app/minesweeper-release.jks`（RSA 2048，有效期 10000 天，别名 `minesweeper`），签名信息从 `android/key.properties` 读取：
+
+```properties
+storePassword=******
+keyPassword=******
+keyAlias=minesweeper
+storeFile=minesweeper-release.jks
+```
+
+- **keystore 与 key.properties 均已加入 `.gitignore`，不会上传仓库**；请自行离线备份密钥文件和密码，丢失后无法再发布同一 App 的更新
+- 证书指纹（SHA-256）：`2b619de26e3cd4511e0e0731e9b637669f4d7786e247eca494dec136e1f05078`
+- 缺少 `key.properties` 时自动回退 debug 签名，方便他人克隆后直接调试
+
+打包命令：
+
+```bash
+# APK（按 ABI 拆包）
+flutter build apk --release --flavor prod --split-per-abi
+
+# App Bundle（上架 Google Play 使用）
+flutter build appbundle --release --flavor prod
+```
 
 ## 后续计划
 
