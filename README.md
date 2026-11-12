@@ -24,13 +24,23 @@
 - 每套主题包含背景、卡片、分割线、强调色、危险色、成功色、数字 1~8 配色共 11 组颜色
 - 每套主题独立飘落花纹：紫罗兰-小花、幽萤青-雪花、砂金橙-落叶、酒红霜-枫叶、蜜桃粉-樱花
 
-### 动画（共 6 处）
-1. 首页背景粒子持续飘落 + 自转，随主题切换绘制算法
-2. 首页三张难度卡片依次淡入上移
-3. 加载页齿轮旋转 + 呼吸缩放
-4. 游戏页棋盘流光呼吸、翻格 150ms 过渡、数字弹出缩放
-5. 游戏页火焰光斑跟随手指移动并闪烁
-6. 踩雷全屏爆炸（闪光 + 三层冲击波）；成功页 7 朵小花环绕笑脸旋转，失败页乌云漂移 + 色彩流动
+### 动画（共 12 处，6 类）
+
+| # | 动画效果 | 使用位置 | 实现方式与关键参数 |
+| --- | --- | --- | --- |
+| 1 | 背景花纹持续飘落 + 自转 | 首页 `_PatternPainter` | `AnimationController` 16s 循环 + `AnimatedBuilder` + `CustomPaint`；30~48 个粒子，按主题绘制小花 / 雪花 / 落叶 / 枫叶 / 樱花 |
+| 2 | 三张难度卡片依次淡入上移 | 首页 `_ModeCard` | `TweenAnimationBuilder` 420ms + index×120ms，`easeOutCubic`，`Opacity` 0→1 配 `Transform.translate` 下移 18→0 |
+| 3 | 齿轮旋转 | 加载页 `_LoadingPageState` | `AnimationController` 2200ms 循环 + `RotationTransition` |
+| 4 | 加载圈呼吸缩放 | 加载页 `_LoadingPageState` | `AnimationController` 1200ms 往返，`Tween` 0.88→1.08，`easeInOut` + `ScaleTransition` |
+| 5 | 棋盘流光呼吸 | 游戏页 `_buildBoardArea` | `AnimationController` 5s 循环 + `AnimatedBuilder`，`sin()` 驱动渐变起止点与光晕透明度 |
+| 6 | 翻格底色过渡 | 游戏页 `_CellTile` | `AnimatedContainer` 150ms `easeOut`（底色、边框、圆角） |
+| 7 | 数字 / 旗帜缩放弹出 | 游戏页 `_CellTile` | `AnimatedSwitcher` 180ms + `ScaleTransition` 0.6→1（`easeOutBack`）+ `FadeTransition` |
+| 8 | 火焰跟随手指并闪烁 | 游戏页 `_buildBoardArea` | `Listener` 记录触点 → `AnimatedPositioned` 220ms `easeOut` 跟随；`AnimationController` 620ms 往返驱动透明度 0.35→0.9、缩放 0.85→1.1 |
+| 9 | 踩雷全屏爆炸 | 游戏页 `_BoomPainter` | `AnimationController` 1100ms 单次播放：全屏闪光 + 3 层冲击波圆环 + 中心径向光晕 |
+| 10 | 小花环绕笑脸旋转 | 结算页（成功）`_FlowerRingPainter` | `AnimationController` 14s 循环 + `Transform.rotate`，7 朵五瓣小花按主题色绘制 |
+| 11 | 乌云漂移 + 色彩流动 | 结算页（失败）`_CloudPainter` | `AnimationController` 10s 循环，渐变起止点随时间移动 + 7 团椭圆乌云横向漂移 |
+| 12 | 主题卡选中反馈 | 主题选择页 `_ThemeCard` | `AnimatedContainer` 220ms（边框宽度、发光阴影）+ `AnimatedSwitcher` 180ms 切换勾选图标 |
+
 
 ## 截图
 
