@@ -79,15 +79,58 @@ lib/
     └── result_page.dart     # 结算页（成功 / 失败）
 ```
 
-## 运行
+## 运行与打包
+
+### 环境准备
 
 ```bash
 flutter pub get
-flutter run                 # 连接手机或模拟器
-flutter build apk --release # 打包 APK
 ```
+
+### Flavor 配置
+
+`android/app/build.gradle.kts` 中定义了两个产品 flavor（参考 Flutter 官方《为 Android 配置 flavor》文档）：
+
+| flavor | applicationId | 应用显示名 | 用途 |
+| --- | --- | --- | --- |
+| `dev` | `com.xx.minesweeper_app.dev` | 扫雷 Dev | 日常开发调试，可与正式版同时安装 |
+| `prod` | `com.xx.minesweeper_app` | 扫雷 | 发布版本 |
+
+应用名通过 `resValue` 生成 `app_name` 字符串，`AndroidManifest.xml` 用 `@string/app_name` 引用；Dart 侧用 `appFlavor` 区分环境。
+
+### 运行
+
+```bash
+flutter run --flavor dev      # 开发版
+flutter run --flavor prod     # 正式版
+```
+
+### 打包 APK
+
+```bash
+# 单包（含所有 ABI，体积较大）
+flutter build apk --release --flavor prod
+
+# 按 ABI 拆包（推荐，安装包更小）
+flutter build apk --release --flavor prod --split-per-abi
+```
+
+产物在 `build/app/outputs/flutter-apk/`：
+
+| 文件 | 适用设备 |
+| --- | --- |
+| `app-arm64-v8a-prod-release.apk` | 绝大多数 Android 手机 |
+| `app-armeabi-v7a-prod-release.apk` | 老旧 32 位设备 |
+| `app-x86_64-prod-release.apk` | 模拟器 |
+
+### 已构建的安装包
+
+**[下载 minesweeper-v1.0.0-arm64-v8a.apk](apk/minesweeper-v1.0.0-arm64-v8a.apk)**（15.2 MB，适用于 arm64 手机，直接传到手机安装即可）
+
+> 说明：release 构建目前沿用 Flutter 模板的 debug 签名（`signingConfigs.getByName("debug")`），可直接侧载安装，但**不能上架应用商店**。正式发布前需要生成自己的 keystore 并配置 signingConfig。
 
 ## 后续计划
 
 - [ ] 主题选择本地持久化，重开 App 保留上次选择
 - [ ] 记录各难度最佳时间
+- [ ] 配置正式签名（keystore）并构建 appbundle 上架
